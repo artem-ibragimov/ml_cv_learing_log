@@ -5,6 +5,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import make_scorer, r2_score, mean_squared_error
+from sklearn.model_selection import cross_validate
+from pprint import pprint
+from sklearn.model_selection import GridSearchCV
 
 df = pd.read_csv("./week0/possum.csv")
 df = df.drop(columns=["case", "site", "Pop", "sex"]).dropna()
@@ -57,7 +61,21 @@ y_predict = predcit_numpy(
 
 print(y_predict)
 
-model = KNeighborsRegressor(n_neighbors=5)
-model.fit(X=X_train[:30], y=y_train[:30])
-y_pred = model.predict(X=X_test[:5])
-print(y_pred[:5])
+model = DecisionTreeRegressor()
+param_grid = {
+    'max_depth': [1, 2, 3, 4],
+    'min_samples_leaf': [1, 2, 3],
+}
+gridsearch = GridSearchCV(model, param_grid=param_grid, refit=True, scoring=make_scorer(r2_score))
+
+gridsearch.fit(X=X_train, y=y_train)
+pprint(gridsearch.best_params_)
+
+best_model = gridsearch.best_estimator_
+print(f'MSE train = {mean_squared_error(y_train, best_model.predict(X_train))}')
+print(f'MSE test = {mean_squared_error(y_test, best_model.predict(X_test))}')
+
+import pickle
+
+filename = 'best_model.sav'
+pickle.dump(best_model, open(filename, 'wb'))
