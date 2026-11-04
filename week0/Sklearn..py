@@ -12,24 +12,28 @@ df = df.drop(columns=["case", "site", "Pop", "sex"]).dropna()
 X = df.drop(["age"], axis=1)
 y = df["age"]
 
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X.values, y.values, test_size=0.2, random_state=44
-)
+X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2, random_state=44)
 
 
 def euclodean_distance(vec1: np.ndarray, vec2: np.ndarray):
     return np.linalg.norm(vec1 - vec2)
 
 
-def get_neighbors_numpy(train: np.ndarray, test_row: np.ndarray, num_neighbors: int):
+def get_neighbors_numpy(
+    train: np.ndarray,
+    test_row: np.ndarray,
+    num_neighbors: int,
+):
     distances = np.linalg.norm(train - test_row, axis=1)
     nearest_neighbor_ids = distances.argsort()[:num_neighbors]
     return nearest_neighbor_ids
 
 
 def predcit_numpy(
-    X_train: np.ndarray, X_test: np.ndarray, y_train: np.ndarray, num_neighbors: int
+    X_train: np.ndarray,
+    X_test: np.ndarray,
+    y_train: np.ndarray,
+    num_neighbors: int,
 ):
     y_predict = []
 
@@ -39,9 +43,21 @@ def predcit_numpy(
         #   список y ближайших соседей
         nearest_neighbor_y = y_train[nearest_neighbor_ids]
         pred = np.mean(nearest_neighbor_y)
-        y_predict.append(pred)
+        y_predict.append(float(pred))
 
-        return y_predict
+    return y_predict
 
 
-y_predict = predcit_numpy(X_train=X_train[:30], X_test=X_test[:5], y_train=y_train[:30], num_neighbors=5)
+y_predict = predcit_numpy(
+    X_train=X_train[:30],
+    X_test=X_test[:5],
+    y_train=y_train[:30],
+    num_neighbors=5,
+)
+
+print(y_predict)
+
+model = KNeighborsRegressor(n_neighbors=5)
+model.fit(X=X_train[:30], y=y_train[:30])
+y_pred = model.predict(X=X_test[:5])
+print(y_pred[:5])

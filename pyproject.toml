@@ -1,5 +1,5 @@
 [tool.yapf]
 based_on_style = "pep8"
-column_limit = 88
-split_before_dot = true
-split_all_comma_separated_values = true
+column_limit = 120
+split_before_dot = false
+split_all_comma_separated_values = false
